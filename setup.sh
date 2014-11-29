@@ -144,25 +144,12 @@ function setup_ansible_plugins () {
 }
 
 function run_all_platforms () {
-    if [ ! -e ./setup.sh ] ; then
-        log_error "Error: setup.sh should be run from piksi_firmware toplevel." >&2
-        exit 1
-    elif [[ "$OSTYPE" == "linux-gnu" ]]; then
-        piksi_splash_linux
-        log_info "Checking system dependencies for Linux..."
-        log_info "Please enter your password for apt-get..."
-        log_info "Updating..."
-        sudo apt-get update
-        sudo apt-get install -y ansible curl
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        piksi_splash_osx
-        log_info "Checking system dependencies for OSX..."
-        log_info "Please enter your password..."
-        bootstrap_osx
-    else
-        log_error "This script does not support this platform. Please contact mookerji@swiftnav.com."
-        exit 1
-    fi
+    piksi_splash_linux
+    log_info "Checking system dependencies for Linux..."
+    log_info "Please enter your password for apt-get..."
+    log_info "Updating..."
+    sudo apt-get update
+    sudo apt-get install -y ansible curl
     setup_ansible_plugins
     ansible-playbook -v --ask-sudo-pass -i setup/ansible/inventory.ini \
         setup/ansible/provision.yml --connection=local
