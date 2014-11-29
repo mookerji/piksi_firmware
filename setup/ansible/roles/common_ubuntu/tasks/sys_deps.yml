@@ -48,16 +48,11 @@
              --allow-external intelhex
              --allow-unverified intelhex
 
-- name: Add ARM GCC repo toolchain repository
-  sudo: True
-  command: add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
+- name: Download GCC arm
+  shell: wget https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
 
-- name: Updating apt-cache
-  sudo: Yes
-  apt: update_cache=yes
+- name: unzip ARM
+  shell: tar -jxvf gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
 
-- name: Install ARM GCC toolchain
-  apt: pkg={{ item }} state=latest
-  sudo: True
-  with_items:
-    - gcc-arm-none-eabi
+- name: Set the path
+  shell: export PATH=$HOME/gcc-arm-none-eabi-4_8-2014q3/bin:$PATH

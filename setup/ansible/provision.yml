@@ -20,6 +20,13 @@
   roles:
     - common_ubuntu
 
+- name: provision piksi development dependencies for Debian
+  hosts: Debian
+  sudo: yes
+  gather_facts: false
+  roles:
+    - common_ubuntu
+
 - name: provision piksi development dependencies for OS X
   hosts: MacOSX
   gather_facts: false
