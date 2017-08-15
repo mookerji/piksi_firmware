@@ -1,34 +1,38 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+# Vagrantfile used largely for cross-platform testing of
+# piksi_firmware dependency installation.
+
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-
-  config.vm.box = "precise64"
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
-  config.vm.box_download_checksum_type = "sha256"
-  config.vm.box_download_checksum = "9a8bdea70e1d35c1d7733f587c34af07491872f2832f0bc5f875b536520ec17e"
-
-  config.vm.provider :vmware_fusion do |vmware, override|
-    override.vm.box = "precise64_fusion"
-    override.vm.box_url = "http://files.vagrantup.com/precise64_vmware_fusion.box"
-    config.vm.box_download_checksum_type = "sha256"
-    config.vm.box_download_checksum = "b79e900774b6a27500243d28bd9b1770e428faa3d8a3e45997f2a939b2b63570"
-    vmware.vmx["memsize"] = "1024"
-    vmware.vmx["numvcpus"] = "2"
+  # Box definitions for different targets
+  # Ubuntu 14.04 LTS
+  config.vm.define "trusty" do |trusty64|
+    trusty64.vm.box = "trusty64"
+    trusty64.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
   end
-
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ["modifyvm", :id, "--usb", "on", "--usbehci", "on"]
+  # Debian 7.6
+  config.vm.define "wheezy" do |wheezy|
+    wheezy.vm.box = "wheezy"
+    wheezy.vm.box_url = "https://github.com/jose-lpa/packer-debian_7.6.0/releases/download/1.0/packer_virtualbox-iso_virtualbox.box"
   end
-
-  config.vm.provision :shell, :inline => "apt-get update -q && cd /vagrant && ./setup.sh"
+  # Networking and memory configuration
   config.vm.network "private_network", ip: "192.168.10.200"
   config.vm.network :forwarded_port, guest: 22, host: 1234
   config.ssh.forward_agent = true
-
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 1024
+    vb.cpus = 2
+  end
+  # Provisioner definitions
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "setup/ansible/provision.yml"
+    ansible.verbose = "v"
+    ansible.host_key_checking = false
+  end
+  # Shared directory
   share_prefix = "share-"
   Dir['../*/'].each do |fname|
     basename = File.basename(fname)

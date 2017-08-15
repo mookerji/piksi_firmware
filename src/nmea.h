@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Swift Navigation Inc.
+ * Copyright (C) 2013-2016 Swift Navigation Inc.
  * Contact: Fergus Noble <fergus@swift-nav.com>
  *
  * This source is subject to the license found in the file 'LICENSE' which must
@@ -15,7 +15,7 @@
 
 #include <libswiftnav/common.h>
 #include <libswiftnav/pvt.h>
-#include <libswiftnav/gpstime.h>
+#include <libswiftnav/time.h>
 
 #include "track.h"
 
@@ -32,11 +32,24 @@
 #define NMEA_GGA_FIX_MANUAL  7
 #define NMEA_GGA_FIX_SIM     8
 
-void nmea_gpgga(double pos_llh[3], gps_time_t *gps_t, u8 n_used, u8 fix_type,
-                double hdop);
-void nmea_gpgsa(tracking_channel_t *chans, dops_t *dops);
-void nmea_gpgsv(u8 n_used, navigation_measurement_t *nav_meas,
-                gnss_solution *soln);
+#define MS2KNOTTS(x,y,z)     sqrt((x)*(x) + (y)*(y) + (z)*(z)) * 1.94385
+#define MS2KMHR(x,y,z)       sqrt((x)*(x)+(y)*(y)+(z)*(z)) * (3600.0/1000.0)
+
+
+void nmea_setup(void);
+void nmea_gpgga(const double pos_llh[3], const gps_time_t *gps_t, u8 n_used,
+                u8 fix_type, double hdop, double diff_age, u16 station_id);
+void nmea_gpgsa(const u8 *prns, u8 num_prns, const dops_t *dops);
+void nmea_gpgsv(u8 n_used, const navigation_measurement_t *nav_meas,
+                const gnss_solution *soln);
+void nmea_gprmc(const gnss_solution *soln, const gps_time_t *gps_t);
+void nmea_gpvtg(const gnss_solution *soln);
+void nmea_gpgll(const gnss_solution *soln, const gps_time_t *gps_t);
+void nmea_gpzda(const gps_time_t *gps_t);
+void nmea_send_msgs(gnss_solution *soln, u8 n,
+                    navigation_measurement_t *nm,
+                    const dops_t *dops,
+                    bool skip_velocity);
 
 /** Register a new dispatcher for NMEA messages
  *
@@ -50,7 +63,7 @@ void nmea_gpgsv(u8 n_used, navigation_measurement_t *nav_meas,
 
 /** \cond */
 struct nmea_dispatcher {
-  void (*send)(const char *msg);
+  void (*send)(const char *msg, size_t msg_size);
   struct nmea_dispatcher *next;
 };
 
@@ -60,4 +73,3 @@ void _nmea_dispatcher_register(struct nmea_dispatcher *);
 /** \} */
 
 #endif  /* SWIFTNAV_NMEA_H */
-

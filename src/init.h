@@ -13,15 +13,12 @@
 #ifndef SWIFTNAV_INIT_H
 #define SWIFTNAV_INIT_H
 
-#include <libopencm3/stm32/f4/rcc.h>
-#include <libswiftnav/common.h>
-
-extern const clock_scale_t hse_16_368MHz_in_65_472MHz_out_3v3;
-extern const clock_scale_t hse_16_368MHz_in_130_944MHz_out_3v3;
-extern const clock_scale_t hse_16_368MHz_in_120_203MHz_out_3v3;
-
+void pre_init(void);
 void init(void);
-void check_nap_auth(void);
+
+s32 serial_number_get(void);
+u8 hw_revision_string_get(char *hw_revision_string);
+u8 nap_version_string_get(char *nap_version_string);
 
 #endif
 

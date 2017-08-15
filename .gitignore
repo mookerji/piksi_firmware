@@ -1,3 +1,6 @@
+.*.sw*
+core-*
+ext/ext.c
 .DS_Store
 .gdbinit
 docs/html
@@ -13,8 +16,17 @@ docs/html
 *.pyc
 *.csv
 *.obs
+*.swp
 scripts/pyinstaller/build
 scripts/pyinstaller/dist
 build/
 testing_crap/
 scripts/RELEASE-VERSION
+
+/scripts/testing/hub_ctrl
+/scripts/testing/bootload_log*
+
+.cproject
+.project
+.settings/
+
